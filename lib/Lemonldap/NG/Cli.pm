@@ -70,24 +70,24 @@ sub parseCmd
 {
      my ($self) = @_;
 
-     if ($self->{argc} < 2)
+     if ($self->{argc} < 1)
      {
           $self->setError (TOO_FEW_ARGUMENTS);
           return FALSE;
      }
 
-     switch ($self->{argv}[1])
+     switch ($self->{argv}[0])
      {
           case "set"
           {
-               if ($self->{argc} < 4)
+               if ($self->{argc} < 3)
                {
                     $self->setError (TOO_FEW_ARGUMENTS);
                     return FALSE;
                }
 
-               my $var = $self->{argv}[2];
-               my $val = $self->{argv}[3];
+               my $var = $self->{argv}[1];
+               my $val = $self->{argv}[2];
 
                $self->{action} =
                {
