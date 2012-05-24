@@ -55,7 +55,7 @@ sub run
 
      if (!$self->parseCmd ())
      {
-          print STDERR $self->getError ();
+          print STDERR $self->getError (), "\n";
           return 1;
      }
 
