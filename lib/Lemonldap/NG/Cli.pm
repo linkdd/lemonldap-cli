@@ -2,6 +2,24 @@ package Lemonldap::NG::Cli;
 
 our $VERSION = "0.1";
 
+# Boolean
+use constant
+{
+     FALSE => 0,
+     TRUE  => 1,
+};
+
+# Errors
+use constant
+{
+     TOO_FEW_ARGUMENTS => "Too few arguments",
+     UNKNOWN_ACTION    => "Unknown action",
+};
+
+# Required packages
+
+use strict;
+use Switch;
 use Lemonldap::NG::Common::Conf;
 
 ## @cmethod Lemonldap::NG::Cli new ()
@@ -33,9 +51,11 @@ sub run
      my ($self, @argv) = @_;
 
      $self->{argv} = \@argv;
+     $self->{argc} = @argv;
 
      if (!$self->parseCmd ())
      {
+          print STDERR $self->getError ();
           return 1;
      }
 
@@ -50,10 +70,64 @@ sub parseCmd
 {
      my ($self) = @_;
 
-     return 1;
+     if ($self->{argc} < 2)
+     {
+          $self->setError (TOO_FEW_ARGUMENTS);
+          return FALSE;
+     }
+
+     switch ($self->{argv}[1])
+     {
+          case "set"
+          {
+               if ($self->{argc} < 4)
+               {
+                    $self->setError (TOO_FEW_ARGUMENTS);
+                    return FALSE;
+               }
+
+               $self->{action} =
+               {
+                    type => "set",
+                    var  => $var,
+                    val  => $val,
+               };
+          }
+
+          else
+          {
+               $self->setError (UNKNOWN_ACTION);
+               return FALSE;
+          }
+     }
+
+     return TRUE;
 }
 
-use strict;
+## @method void setError (string str)
+# Set error message
+#
+# @param str Text of the error
+sub setError
+{
+     my ($self, $msg) = @_;
+
+     $self->{errormsg} = $msg;
+}
+
+## @method string getError (void)
+# Get error message
+#
+# @return Text of the error
+sub getError
+{
+     my ($self) = @_;
+
+     my $msg = $self->{errormsg};
+
+     return $msg;
+}
+
 1;
 __END__
 
