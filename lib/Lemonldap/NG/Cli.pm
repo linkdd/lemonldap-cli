@@ -17,18 +17,38 @@ sub new
           "confAccess" =>  Lemomldap::NG::Common::Conf->new ()
      };
 
+     $this->{conf} = $this->{confAccess}->getConf ();
+
      bless ($this, $class);
      return $this;
 }
 
-## @method void parseCmd (array argv)
-# Initialize the shell
+## @method int run (array argv)
+# Run the application
 #
 # @param @argv List of arguments of the command line
-# @return 
-sub parseCmd
+# @return Exit code
+sub run
 {
      my ($self, @argv) = @_;
+
+     $self->{argv} = \@argv;
+
+     if (!$self->parseCmd ())
+          return 1;
+
+     return 0;
+}
+
+## @method bool parseCmd ()
+# Parse command line
+#
+# @return true on success, false otherwise
+sub parseCmd
+{
+     my ($self) = @_;
+
+     return 1;
 }
 
 use strict;
