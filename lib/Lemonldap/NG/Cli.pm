@@ -1,27 +1,22 @@
 package Lemonldap::NG::Cli;
 
+# Required packages
+
+use strict;
+use Lemonldap::NG::Common::Conf;
+
+use feature qw (switch);
+
+# Constants
+
 our $VERSION = "0.1";
 
-# Boolean
-use constant
-{
-     FALSE => 0,
-     TRUE  => 1,
-};
-
-# Errors
-use constant
+our $ERRORS =
 {
      TOO_FEW_ARGUMENTS  => "Too few arguments",
      UNKNOWN_ACTION     => "Unknown action",
      CONFIG_WRITE_ERROR => "Error while writting the configuration",
 };
-
-# Required packages
-
-use strict;
-use Switch;
-use Lemonldap::NG::Common::Conf;
 
 ## @cmethod Lemonldap::NG::Cli new ()
 # Create a new Lemonldap::NG::Cli object
@@ -91,19 +86,19 @@ sub parseCmd
      # check if there is at least on action specified
      if ($self->{argc} < 1)
      {
-          $self->setError (TOO_FEW_ARGUMENTS);
-          return FALSE;
+          $self->setError ($ERRORS->{TOO_FEW_ARGUMENTS});
+          return 0;
      }
 
-     switch ($self->{argv}[0])
+     given ($self->{argv}[0])
      {
-          case "set"
+          when ("set")
           {
                # set takes two parameters
                if ($self->{argc} < 3)
                {
-                    $self->setError (TOO_FEW_ARGUMENTS);
-                    return FALSE;
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
                }
 
                my $var = $self->{argv}[1];
@@ -118,13 +113,13 @@ sub parseCmd
                };
           }
 
-          case "get"
+          when ("get")
           {
                # get takes one parameter
                if ($self->{argc} < 2)
                {
-                    $self->setError (TOO_FEW_ARGUMENTS);
-                    return FALSE;
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
                }
 
                my $var = $self->{argv}[1];
@@ -138,14 +133,14 @@ sub parseCmd
           }
 
           # no action found
-          else
+          default
           {
-               $self->setError (UNKNOWN_ACTION);
-               return FALSE;
+               $self->setError ("$_: ".$ERRORS->{UNKNOWN_ACTION});
+               return 0;
           }
      }
 
-     return TRUE;
+     return 1;
 }
 
 ## @method bool action ()
@@ -156,9 +151,9 @@ sub action
 {
      my ($self) = @_;
 
-     switch ($self->{action}->{type})
+     given ($self->{action}->{type})
      {
-          case "set"
+          when ("set")
           {
                my $var = $self->{action}->{var};
                my $val = $self->{action}->{val};
@@ -171,14 +166,14 @@ sub action
                # If there is no config identifier, then an error occured
                if (!$cfgNb)
                {
-                    $self->setError (CONFIG_WRITE_ERROR);
-                    return FALSE;
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
                }
 
                print "Configuration $cfgNb created!\n";
           }
 
-          case "get"
+          when ("get")
           {
                my $var = $self->{action}->{var};
 
@@ -186,7 +181,7 @@ sub action
           }
      }
 
-     return TRUE;
+     return 1;
 }
 
 ## @method void setError (string str)
