@@ -86,6 +86,9 @@ sub parseCmd
                     return FALSE;
                }
 
+               my $var = $self->{argv}[2];
+               my $val = $self->{argv}[3];
+
                $self->{action} =
                {
                     type => "set",
