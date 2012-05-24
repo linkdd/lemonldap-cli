@@ -12,8 +12,9 @@ use constant
 # Errors
 use constant
 {
-     TOO_FEW_ARGUMENTS => "Too few arguments",
-     UNKNOWN_ACTION    => "Unknown action",
+     TOO_FEW_ARGUMENTS  => "Too few arguments",
+     UNKNOWN_ACTION     => "Unknown action",
+     CONFIG_WRITE_ERROR => "Error while writting the configuration",
 };
 
 # Required packages
@@ -41,6 +42,17 @@ sub new
      return $this;
 }
 
+## @method int saveConf ()
+# Save LemonLDAP::NG configuration
+#
+# @return Configuration identifier.
+sub saveConf
+{
+     my ($self) = @_;
+     my $ret = $self->{confAccess}->saveConf ($self->{conf});
+     return $ret;
+}
+
 ## @method int run (array argv)
 # Run the application
 #
@@ -59,17 +71,11 @@ sub run
           return 1;
      }
 
-     $self->action ();
-
-     my $ret = $self->{confAccess}->saveConf ($self->{conf});
-
-     if (!$ret)
+     if (!$self->action ())
      {
-          print STDERR "Error while saving configuration.\n";
+          print STDERR $self->getError (), "\n";
           return 1;
      }
-
-     print "Configuration $ret created!\n";
 
      return 0;
 }
@@ -82,6 +88,7 @@ sub parseCmd
 {
      my ($self) = @_;
 
+     # check if there is at least on action specified
      if ($self->{argc} < 1)
      {
           $self->setError (TOO_FEW_ARGUMENTS);
@@ -92,6 +99,7 @@ sub parseCmd
      {
           case "set"
           {
+               # set takes two parameters
                if ($self->{argc} < 3)
                {
                     $self->setError (TOO_FEW_ARGUMENTS);
@@ -101,6 +109,7 @@ sub parseCmd
                my $var = $self->{argv}[1];
                my $val = $self->{argv}[2];
 
+               # define action
                $self->{action} =
                {
                     type => "set",
@@ -109,6 +118,26 @@ sub parseCmd
                };
           }
 
+          case "get"
+          {
+               # get takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError (TOO_FEW_ARGUMENTS);
+                    return FALSE;
+               }
+
+               my $var = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "get",
+                    var  => $var,
+               };
+          }
+
+          # no action found
           else
           {
                $self->setError (UNKNOWN_ACTION);
@@ -119,8 +148,10 @@ sub parseCmd
      return TRUE;
 }
 
-## @method void action (void)
+## @method bool action ()
 # Execute action parsed by parseCmd() method
+#
+# @return true on success, false otherwise
 sub action
 {
      my ($self) = @_;
@@ -129,9 +160,33 @@ sub action
      {
           case "set"
           {
-               $self->{conf}->{$self->{action}->{var}} = $self->{action}->{val};
+               my $var = $self->{action}->{var};
+               my $val = $self->{action}->{val};
+
+               $self->{conf}->{$var} = $val;
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError (CONFIG_WRITE_ERROR);
+                    return FALSE;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          case "get"
+          {
+               my $var = $self->{action}->{var};
+
+               print "$var = '", $self->{conf}->{$var}, "'\n";
           }
      }
+
+     return TRUE;
 }
 
 ## @method void setError (string str)
@@ -145,7 +200,7 @@ sub setError
      $self->{errormsg} = $msg;
 }
 
-## @method string getError (void)
+## @method string getError ()
 # Get error message
 #
 # @return Text of the error
