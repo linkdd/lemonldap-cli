@@ -14,7 +14,7 @@ sub new
 
      my $this =
      {
-          "confAccess" =>  Lemomldap::NG::Common::Conf->new ()
+          "confAccess" =>  Lemonldap::NG::Common::Conf->new ()
      };
 
      $this->{conf} = $this->{confAccess}->getConf ();
@@ -35,7 +35,9 @@ sub run
      $self->{argv} = \@argv;
 
      if (!$self->parseCmd ())
+     {
           return 1;
+     }
 
      return 0;
 }
