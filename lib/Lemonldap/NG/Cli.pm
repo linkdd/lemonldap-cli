@@ -59,6 +59,18 @@ sub run
           return 1;
      }
 
+     $self->action ();
+
+     my $ret = $self->{confAccess}->saveConf ($self->{conf});
+
+     if (!$ret)
+     {
+          print STDERR "Error while saving configuration.\n";
+          return 1;
+     }
+
+     print "Configuration $ret created!\n";
+
      return 0;
 }
 
@@ -105,6 +117,21 @@ sub parseCmd
      }
 
      return TRUE;
+}
+
+## @method void action (void)
+# Execute action parsed by parseCmd() method
+sub action
+{
+     my ($self) = @_;
+
+     switch ($self->{action}->{type})
+     {
+          case "set"
+          {
+               $self->{conf}->{$self->{action}->{var}} = $self->{action}->{val};
+          }
+     }
 }
 
 ## @method void setError (string str)
