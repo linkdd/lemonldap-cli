@@ -1,26 +1,22 @@
 package Lemonldap::NG::Cli;
 
-our $VERSION = "0.1";
-
-# Boolean
-use constant
-{
-     FALSE => 0,
-     TRUE  => 1,
-};
-
-# Errors
-use constant
-{
-     TOO_FEW_ARGUMENTS => "Too few arguments",
-     UNKNOWN_ACTION    => "Unknown action",
-};
-
 # Required packages
 
 use strict;
-use Switch;
 use Lemonldap::NG::Common::Conf;
+
+use feature qw (switch);
+
+# Constants
+
+our $VERSION = "0.1";
+
+our $ERRORS =
+{
+     TOO_FEW_ARGUMENTS  => "Too few arguments",
+     UNKNOWN_ACTION     => "Unknown action",
+     CONFIG_WRITE_ERROR => "Error while writting the configuration",
+};
 
 ## @cmethod Lemonldap::NG::Cli new ()
 # Create a new Lemonldap::NG::Cli object
@@ -41,6 +37,17 @@ sub new
      return $this;
 }
 
+## @method int saveConf ()
+# Save LemonLDAP::NG configuration
+#
+# @return Configuration identifier.
+sub saveConf
+{
+     my ($self) = @_;
+     my $ret = $self->{confAccess}->saveConf ($self->{conf});
+     return $ret;
+}
+
 ## @method int run (array argv)
 # Run the application
 #
@@ -59,17 +66,11 @@ sub run
           return 1;
      }
 
-     $self->action ();
-
-     my $ret = $self->{confAccess}->saveConf ($self->{conf});
-
-     if (!$ret)
+     if (!$self->action ())
      {
-          print STDERR "Error while saving configuration.\n";
+          print STDERR $self->getError (), "\n";
           return 1;
      }
-
-     print "Configuration $ret created!\n";
 
      return 0;
 }
@@ -82,25 +83,28 @@ sub parseCmd
 {
      my ($self) = @_;
 
+     # check if there is at least on action specified
      if ($self->{argc} < 1)
      {
-          $self->setError (TOO_FEW_ARGUMENTS);
-          return FALSE;
+          $self->setError ($ERRORS->{TOO_FEW_ARGUMENTS});
+          return 0;
      }
 
-     switch ($self->{argv}[0])
+     given ($self->{argv}[0])
      {
-          case "set"
+          when ("set")
           {
+               # set takes two parameters
                if ($self->{argc} < 3)
                {
-                    $self->setError (TOO_FEW_ARGUMENTS);
-                    return FALSE;
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
                }
 
                my $var = $self->{argv}[1];
                my $val = $self->{argv}[2];
 
+               # define action
                $self->{action} =
                {
                     type => "set",
@@ -109,29 +113,75 @@ sub parseCmd
                };
           }
 
-          else
+          when ("get")
           {
-               $self->setError (UNKNOWN_ACTION);
-               return FALSE;
+               # get takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $var = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "get",
+                    var  => $var,
+               };
+          }
+
+          # no action found
+          default
+          {
+               $self->setError ("$_: ".$ERRORS->{UNKNOWN_ACTION});
+               return 0;
           }
      }
 
-     return TRUE;
+     return 1;
 }
 
-## @method void action (void)
+## @method bool action ()
 # Execute action parsed by parseCmd() method
+#
+# @return true on success, false otherwise
 sub action
 {
      my ($self) = @_;
 
-     switch ($self->{action}->{type})
+     given ($self->{action}->{type})
      {
-          case "set"
+          when ("set")
           {
-               $self->{conf}->{$self->{action}->{var}} = $self->{action}->{val};
+               my $var = $self->{action}->{var};
+               my $val = $self->{action}->{val};
+
+               $self->{conf}->{$var} = $val;
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("get")
+          {
+               my $var = $self->{action}->{var};
+
+               print "$var = '", $self->{conf}->{$var}, "'\n";
           }
      }
+
+     return 1;
 }
 
 ## @method void setError (string str)
@@ -145,7 +195,7 @@ sub setError
      $self->{errormsg} = $msg;
 }
 
-## @method string getError (void)
+## @method string getError ()
 # Get error message
 #
 # @return Text of the error
