@@ -1,7 +1,7 @@
 # What is it ?
 
-*lemonldap-cli* is a command line tool to configure **LemonLDAP::NG**, in order
-to automatize the installation.
+*lemonldap-cli* is a command line tool to configure **LemonLDAP::NG** from the
+command line. Make you able to deploy your web application faster and easier.
 
 # Installation
 
@@ -9,4 +9,9 @@ to automatize the installation.
 
 # How to use
 
-***To be written***
+Set/get variables in the configuration:
+
+``
+lemonldap-cli set <variable> <value>
+lemonldap-cli get <variable>
+``
