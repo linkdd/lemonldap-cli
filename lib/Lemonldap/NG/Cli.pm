@@ -216,6 +216,29 @@ sub parseCmd
                };
           }
 
+          ## Applications
+
+          when ("apps-set-cat")
+          {
+               # apps-set-cat takes two parameter
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $catid   = $self->{argv}[1];
+               my $catname = $self->{argv}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-set-cat",
+                    id   => $catid,
+                    name => $catname
+               };
+          }
+
           # no action found
           default
           {
@@ -237,6 +260,8 @@ sub action
 
      given ($self->{action}->{type})
      {
+          ## Variables
+
           when ("set")
           {
                my $var = $self->{action}->{var};
@@ -283,6 +308,8 @@ sub action
                print "$var = '", $self->{conf}->{$var}, "'\n";
           }
 
+          ## Macros
+
           when ("set-macro")
           {
                my $m_name = $self->{action}->{name};
@@ -327,6 +354,39 @@ sub action
                my $m_name = $self->{action}->{name};
 
                print "$m_name = '", $self->{conf}->{macros}->{$m_name}, "'\n";
+          }
+
+          ## Applications
+
+          when ("apps-set-cat")
+          {
+               my $catid   = $self->{action}->{id};
+               my $catname = $self->{action}->{name};
+
+               if (defined ($self->{conf}->{applicationList}->{$catid}))
+               {
+                    $self->{conf}->{applicationList}->{$catid}->{catname} = $catname;
+               }
+               else
+               {
+                    $self->{conf}->{applicationList}->{$catid} =
+                    {
+                         type    => "category",
+                         catname => $catname
+                    };
+               }
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
           }
 
           default

@@ -27,3 +27,9 @@ lemonldap-cli unset-macro <macro name>
 lemonldap-cli get-macro <macro name>
 ``
 
+Modify application list:
+
+``
+lemonldap-cli apps-set-cat <cat id> <cat name>
+``
+
