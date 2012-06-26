@@ -16,6 +16,7 @@ our $ERRORS =
      TOO_FEW_ARGUMENTS  => "Too few arguments",
      UNKNOWN_ACTION     => "Unknown action",
      CONFIG_WRITE_ERROR => "Error while writting the configuration",
+     NOT_IMPLEMENTED    => "Not yet implemented",
 };
 
 ## @cmethod Lemonldap::NG::Cli new ()
@@ -132,6 +133,46 @@ sub parseCmd
                };
           }
 
+          when ("set-macro")
+          {
+               # set-macro takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $m_name = $self->{argv}[1];
+               my $m_expr = $self->{argv}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "set-macro",
+                    name => $m_name,
+                    expr => $m_expr
+               };
+          }
+
+          when ("get-macro")
+          {
+               # get-macro tkaes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $m_name = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "get-macro",
+                    name => $m_name
+               };
+          }
+
           # no action found
           default
           {
@@ -178,6 +219,39 @@ sub action
                my $var = $self->{action}->{var};
 
                print "$var = '", $self->{conf}->{$var}, "'\n";
+          }
+
+          when ("set-macro")
+          {
+               my $m_name = $self->{action}->{name};
+               my $m_expr = $self->{action}->{expr};
+
+               $self->{conf}->{macros}->{$m_name} = $m_expr;
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("get-macro")
+          {
+               my $m_name = $self->{action}->{name};
+
+               print "$m_name = '", $self->{conf}->{macros}->{$m_name}, "'\n";
+          }
+
+          default
+          {
+               $self->setError ("$_: ".$ERRORS->{NOT_IMPLEMENTED});
+               return 0;
           }
      }
 
