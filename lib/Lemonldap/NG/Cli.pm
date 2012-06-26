@@ -121,7 +121,7 @@ sub parseCmd
                # unset takes one parameter
                if ($self->{argc} < 2)
                {
-                    $self->setError ("$_: ".$ERRORS{TOO_FEW_ARGUMENTS});
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
                     return 0;
                }
 
@@ -182,7 +182,7 @@ sub parseCmd
                # unset-macro takes one parameter
                if ($self->{argc} < 2)
                {
-                    $self->setError ("$_: ".$ERRORS{TOO_FEW_ARGUMENTS});
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
                     return 0;
                }
 
