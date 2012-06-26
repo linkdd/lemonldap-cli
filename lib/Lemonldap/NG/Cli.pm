@@ -56,10 +56,10 @@ sub saveConf
 # @return Exit code
 sub run
 {
-     my ($self, @argv) = @_;
+     my ($self, $argv) = @_;
 
-     $self->{argv} = \@argv;
-     $self->{argc} = @argv;
+     $self->{argv} = \@{$argv};
+     $self->{argc} = @{argv};
 
      if (!$self->parseCmd ())
      {
@@ -91,7 +91,7 @@ sub parseCmd
           return 0;
      }
 
-     given ($self->{argv}[0])
+     given (@{$self->{argv}}[0])
      {
           ## Variables
 
@@ -104,8 +104,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $var = $self->{argv}[1];
-               my $val = $self->{argv}[2];
+               my $var = @{$self->{argv}}[1];
+               my $val = @{$self->{argv}}[2];
 
                # define action
                $self->{action} =
@@ -125,7 +125,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $var = $self->{argv}[1];
+               my $var = @{$self->{argv}}[1];
 
                # define action
                $self->{action} =
@@ -144,7 +144,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $var = $self->{argv}[1];
+               my $var = @{$self->{argv}}[1];
 
                # define action
                $self->{action} =
@@ -165,8 +165,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $m_name = $self->{argv}[1];
-               my $m_expr = $self->{argv}[2];
+               my $m_name = @{$self->{argv}}[1];
+               my $m_expr = @{$self->{argv}}[2];
 
                # define action
                $self->{action} =
@@ -186,7 +186,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $m_name = $self->{argv}[1];
+               my $m_name = @{$self->{argv}}[1];
 
                # define action
                $self->{action} =
@@ -206,7 +206,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $m_name = $self->{argv}[1];
+               my $m_name = @{$self->{argv}}[1];
 
                # define action
                $self->{action} =
@@ -227,8 +227,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $catid   = $self->{argv}[1];
-               my $catname = $self->{argv}[2];
+               my $catid   = @{$self->{argv}}[1];
+               my $catname = @{$self->{argv}}[2];
 
                # define action
                $self->{action} =
