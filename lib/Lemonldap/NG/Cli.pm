@@ -59,7 +59,7 @@ sub run
      my ($self, $argv) = @_;
 
      $self->{argv} = \@{$argv};
-     $self->{argc} = @{argv};
+     $self->{argc} = @{$argv};
 
      if (!$self->parseCmd ())
      {
