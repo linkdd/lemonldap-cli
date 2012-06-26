@@ -93,6 +93,8 @@ sub parseCmd
 
      given ($self->{argv}[0])
      {
+          ## Variables
+
           when ("set")
           {
                # set takes two parameters
@@ -111,6 +113,25 @@ sub parseCmd
                     type => "set",
                     var  => $var,
                     val  => $val,
+               };
+          }
+
+          when ("unset")
+          {
+               # unset takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $var = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "unset",
+                    var  => $var
                };
           }
 
@@ -133,6 +154,8 @@ sub parseCmd
                };
           }
 
+          ## Macros
+
           when ("set-macro")
           {
                # set-macro takes two parameters
@@ -152,6 +175,26 @@ sub parseCmd
                     name => $m_name,
                     expr => $m_expr
                };
+          }
+
+          when ("unset-macro")
+          {
+               # unset-macro takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $m_name = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "unset-macro",
+                    var  => $m_name
+               };
+
           }
 
           when ("get-macro")
@@ -214,6 +257,25 @@ sub action
                print "Configuration $cfgNb created!\n";
           }
 
+          when ("unset")
+          {
+               my $var = $self->{action}->{var};
+
+               delete $self->{conf}->{$var};
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
           when ("get")
           {
                my $var = $self->{action}->{var};
@@ -235,6 +297,25 @@ sub action
                if (!$cfgNb)
                {
                     $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("unset-macro")
+          {
+               my $m_name = $self->{action}->{name};
+
+               delete $self->{conf}->{macros}->{$m_name};
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
                     return 0;
                }
 
