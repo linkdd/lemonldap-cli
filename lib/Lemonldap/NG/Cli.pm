@@ -733,6 +733,138 @@ sub action
                print "Configuration $cfgNb created!\n";
           }
 
+          when ("apps-set-logo")
+          {
+               my $appid   = $self->{action}->{id};
+               my $applogo = $self->{action}->{logo};
+
+               my $found = 0;
+               while (my ($catid, $applist) = each %{$self->{conf}->{applicationList}} and $found != 1)
+               {
+                    while (my ($_appid, $app) = each %{$applist} and $found != 1)
+                    {
+                         if ($appid eq $_appid)
+                         {
+                              $app->{options}->{logo} = $applogo;
+                              $found = 1;
+                         }
+                    }
+               }
+
+               if ($found == 0)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
+                    return 0;
+               }
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("apps-set-display")
+          {
+               my $appid  = $self->{action}->{id};
+               my $appdpy = $self->{action}->{dpy};
+
+               my $found = 0;
+               while (my ($catid, $applist) = each %{$self->{conf}->{applicationList}} and $found != 1)
+               {
+                    while (my ($_appid, $app) = each %{$applist} and $found != 1)
+                    {
+                         if ($appid eq $_appid)
+                         {
+                              $app->{options}->{display} = $appdpy;
+                              $found = 1;
+                         }
+                    }
+               }
+
+               if ($found == 0)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
+                    return 0;
+               }
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("apps-get")
+          {
+               my $appid = $self->{action}->{id};
+
+               my $found = 0;
+               while (my ($catid, $applist) = each %{$self->{conf}->{applicationList}} and $found != 1)
+               {
+                    while (my ($_appid, $app) = each %{$applist} and $found != 1)
+                    {
+                         if ($appid eq $_appid)
+                         {
+                              print "Category '$catid': ".$self->{conf}->{applicationList}->{$catid}->{catname}."\n";
+                              print "Application '$appid': ".$app->{options}->{name}."\n";
+                              print "- Description: ".$app->{options}->{description}."\n";
+                              print "- URI: ".$app->{options}->{uri}."\n";
+                              print "- Logo: ".$app->{options}->{logo}."\n";
+                              print "- Display: ".$app->{options}->{display}."\n";
+                              $found = 1;
+                         }
+                    }
+               }
+
+               if ($found == 0)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
+                    return 0;
+               }
+          }
+
+          when ("apps-rm")
+          {
+               my $appid = $self->{action}->{id};
+
+               my $found = 0;
+               while (my ($catid, $applist) = each %{$self->{conf}->{applicationList}} and $found != 1)
+               {
+                    while (my ($_appid, $app) = each %{$applist} and $found != 1)
+                    {
+                         if ($appid eq $_appid)
+                         {
+                              delete $applist->{$appid};
+                              $found = 1;
+                         }
+                    }
+               }
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
 
           default
           {
