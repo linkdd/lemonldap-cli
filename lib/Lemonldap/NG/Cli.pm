@@ -239,6 +239,25 @@ sub parseCmd
                };
           }
 
+          when ("apps-get-cat")
+          {
+               # apps-get-cat takes one parameter
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $catid = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-get-cat",
+                    id   => $catid
+               };
+          }
+
           # no action found
           default
           {
@@ -387,6 +406,13 @@ sub action
                }
 
                print "Configuration $cfgNb created!\n";
+          }
+
+          when ("apps-get-cat")
+          {
+               my $catid = $self->{action}->{id};
+
+               print "$catid: ", $self->{conf}->{applicationList}->{$catid}->{name}, "\n";
           }
 
           default
