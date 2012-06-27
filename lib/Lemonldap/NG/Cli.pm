@@ -622,6 +622,37 @@ sub action
                print "Configuration $cfgNb created!\n";
           }
 
+          when ("apps-set-uri")
+          {
+               my $appid  = $self->{action}->{id};
+               my $appuri = $self->{action}->{uri};
+
+               my $found = 0;
+               while (my ($catid, $applist) = each %{$self->{conf}->{applicationList}} and $found != 1)
+               {
+                    while (my ($_appid, $app) = each %{$applist} and $found != 1)
+                    {
+                         if ($appid eq $_appid)
+                         {
+                              $app->{options}->{uri} = $appuri;
+                              $found = 1;
+                         }
+                    }
+               }
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
           default
           {
                $self->setError ("$_: ".$ERRORS->{NOT_IMPLEMENTED});
