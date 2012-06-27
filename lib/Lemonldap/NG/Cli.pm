@@ -640,6 +640,49 @@ sub action
                     }
                }
 
+               if ($found == 0)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
+                    return 0;
+               }
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("apps-set-name")
+          {
+               my $appid   = $self->{action}->{id};
+               my $appname = $self->{action}->{name};
+
+               my $found = 0;
+               while (my ($catid, $applist) = each %{$self->{conf}->{applicationList}} and $found != 1)
+               {
+                    while (my ($_appid, $app) = each %{$applist} and $found != 1)
+                    {
+                         if ($appid eq $_appid)
+                         {
+                              $app->{options}->{name} = $appname;
+                              $found = 1;
+                         }
+                    }
+               }
+
+               if ($found == 0)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
+                    return 0;
+               }
+
                # Save configuration
                my $cfgNb = $self->saveConf ();
 
