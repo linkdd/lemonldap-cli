@@ -258,6 +258,170 @@ sub parseCmd
                };
           }
 
+          when ("apps-add")
+          {
+               # apps-add takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid = @{$self->{argv}}[1];
+               my $catid = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "apps-add",
+                    appid => $appid,
+                    catid => $catid
+               };
+          }
+
+          when ("apps-set-uri")
+          {
+               # apps-set-uri takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid  = @{$self->{argv}}[1];
+               my $appuri = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-set-uri",
+                    id   => $appid,
+                    uri  => $appuri
+               };
+          }
+
+          when ("apps-set-name")
+          {
+               # apps-set-name takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid   = @{$self->{argv}}[1];
+               my $appname = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-set-name",
+                    id   => $appid,
+                    name => $appname
+               };
+          }
+
+          when ("apps-set-desc")
+          {
+               # apps-set-desc takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid   = @{$self->{argv}}[1];
+               my $appdesc = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-set-desc",
+                    id   => $appid,
+                    desc => $appdesc
+               };
+          }
+
+          when ("apps-set-logo")
+          {
+               # apps-set-logo takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid   = @{$self->{argv}}[1];
+               my $applogo = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-set-logo",
+                    id   => $appid,
+                    logo => $applogo
+               };
+          }
+
+          when ("apps-set-display")
+          {
+               # apps-set-display takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid  = @{$self->{argv}}[1];
+               my $appdpy = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-set-display",
+                    id   => $appid,
+                    dpy  => $appdpy
+               };
+          }
+
+          when ("apps-get")
+          {
+               # apps-get takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-get",
+                    id   => $appid
+               };
+          }
+
+          when ("apps-rm")
+          {
+               # apps-rm takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $appid = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "apps-rm",
+                    id   => $appid
+               };
+          }
+
           # no action found
           default
           {
@@ -413,6 +577,49 @@ sub action
                my $catid = $self->{action}->{id};
 
                print "$catid: ", $self->{conf}->{applicationList}->{$catid}->{name}, "\n";
+          }
+
+          when ("apps-add")
+          {
+               my $appid = $self->{action}->{appid};
+               my $catid = $self->{action}->{catid};
+
+               if (not defined ($self->{conf}->{applicationList}->{$catid}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Category '$catid' doesn't exist");
+                    return 0;
+               }
+
+               if (defined ($self->{conf}->{applicationList}->{$catid}->{$appid}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' exists");
+                    return 0;
+               }
+
+               $self->{conf}->{applicationList}->{$catid}->{$appid} =
+               {
+                    type => "application",
+                    options =>
+                    {
+                         logo        => "demo.png",
+                         name        => $appid,
+                         description => $appid,
+                         display     => "auto",
+                         uri         => "http://test1.example.com"
+                    }
+               };
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
           }
 
           default

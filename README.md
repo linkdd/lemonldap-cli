@@ -31,5 +31,16 @@ Modify application list:
 
 ```
 lemonldap-cli apps-set-cat <cat id> <cat name>
+lemonldap-cli apps-get-cat <cat id>
+
+lemonldap-cli apps-add <app id> <cat id>
+lemonldap-cli apps-set-uri <app id> <app uri>
+lemonldap-cli apps-set-name <app id> <app name>
+lemonldap-cli apps-set-desc <app id> <app description>
+lemonldap-cli apps-set-logo <app id> <logo>
+lemonldap-cli apps-set-display <app id> <app display>
+
+lemonldap-cli apps-get <app id>
+lemonldap-cli apps-rm <app id>
 ```
 
