@@ -959,6 +959,55 @@ sub action
                print "Configuration $cfgNb created!\n";
           }
 
+          when ("rules-unset")
+          {
+               my $uri  = $self->{action}->{uri};
+               my $expr = $self->{action}->{expr};
+
+               if (not defined ($self->{conf}->{locationRules}->{$uri}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$uri'");
+                    return 0;
+               }
+
+               if (not defined ($self->{conf}->{locationRules}->{$uri}->{$expr}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is rule '$expr' for virtual host '$uri'");
+                    return 0;
+               }
+
+               delete $self->{conf}->{locationRules}->{$uri}->{$expr};
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("rules-get")
+          {
+               my $uri = $self->{action}->{uri};
+
+               if (not defined ($self->{conf}->{locationRules}->{$uri}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$uri'");
+                    return 0;
+               }
+
+               print "Virtual Host : $uri\n";
+               while (my ($expr, $rule) = each %{$self->{conf}->{locationRules}->{$uri}})
+               {
+                    print "- $expr => '$rule'\n";
+               }
+          }
+
           # no implementation found
           default
           {
