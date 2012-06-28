@@ -29,7 +29,7 @@ sub new
 
      my $this =
      {
-          "confAccess" =>  Lemonldap::NG::Common::Conf->new ()
+          "confAccess" => Lemonldap::NG::Common::Conf->new ()
      };
 
      $this->{conf} = $this->{confAccess}->getConf ();
@@ -73,6 +73,21 @@ sub run
           return 1;
      }
 
+     if ($self->{action}->{save})
+     {
+          # Save configuration
+          my $cfgNb = $self->saveConf ();
+
+          # If there is no config identifier, then an error occured
+          if (!$cfgNb)
+          {
+               $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+               return 0;
+          }
+
+          print "Configuration $cfgNb created!\n";
+     }
+
      return 0;
 }
 
@@ -111,6 +126,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "set",
+                    save => 1,
                     var  => $var,
                     val  => $val,
                };
@@ -131,6 +147,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "unset",
+                    save => 1,
                     var  => $var
                };
           }
@@ -150,6 +167,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "get",
+                    save => 0,
                     var  => $var,
                };
           }
@@ -172,6 +190,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "set-macro",
+                    save => 1,
                     name => $m_name,
                     expr => $m_expr
                };
@@ -192,6 +211,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "unset-macro",
+                    save => 1,
                     var  => $m_name
                };
 
@@ -212,6 +232,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "get-macro",
+                    save => 0,
                     name => $m_name
                };
           }
@@ -234,6 +255,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-set-cat",
+                    save => 1,
                     id   => $catid,
                     name => $catname
                };
@@ -254,6 +276,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-get-cat",
+                    save => 0,
                     id   => $catid
                };
           }
@@ -274,6 +297,7 @@ sub parseCmd
                $self->{action} =
                {
                     type  => "apps-add",
+                    save => 1,
                     appid => $appid,
                     catid => $catid
                };
@@ -295,6 +319,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-set-uri",
+                    save => 1,
                     id   => $appid,
                     uri  => $appuri
                };
@@ -316,6 +341,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-set-name",
+                    save => 1,
                     id   => $appid,
                     name => $appname
                };
@@ -337,6 +363,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-set-desc",
+                    save => 1,
                     id   => $appid,
                     desc => $appdesc
                };
@@ -358,6 +385,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-set-logo",
+                    save => 1,
                     id   => $appid,
                     logo => $applogo
                };
@@ -379,6 +407,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-set-display",
+                    save => 1,
                     id   => $appid,
                     dpy  => $appdpy
                };
@@ -399,6 +428,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-get",
+                    save => 0,
                     id   => $appid
                };
           }
@@ -418,6 +448,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "apps-rm",
+                    save => 1,
                     id   => $appid
                };
           }
@@ -441,6 +472,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "rules-set",
+                    save => 1,
                     uri  => $uri,
                     expr => $expr,
                     rule => $rule
@@ -463,6 +495,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "rules-unset",
+                    save => 1,
                     uri  => $uri,
                     expr => $expr
                };
@@ -483,6 +516,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "rules-get",
+                    save => 0,
                     uri  => $uri
                };
           }
@@ -505,6 +539,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "export-var",
+                    save => 1,
                     key  => $key,
                     val  => $val
                };
@@ -525,6 +560,7 @@ sub parseCmd
                $self->{action} =
                {
                     type => "unexport-var",
+                    save => 1,
                     key  => $key
                };
           }
@@ -534,7 +570,11 @@ sub parseCmd
                # get-exported-varis doesn't take any parameter
 
                # define action
-               $self->{action} = { type => "get-exported-vars" };
+               $self->{action} =
+               {
+                    type => "get-exported-vars",
+                    save => 0
+               };
           }
 
           # no action found
@@ -566,42 +606,30 @@ sub action
                my $val = $self->{action}->{val};
 
                $self->{conf}->{$var} = $val;
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("unset")
           {
                my $var = $self->{action}->{var};
 
-               delete $self->{conf}->{$var};
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
+               if (not defined ($self->{conf}->{$var}))
                {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no variables named '$var'");
                     return 0;
                }
 
-               print "Configuration $cfgNb created!\n";
+               delete $self->{conf}->{$var};
           }
 
           when ("get")
           {
                my $var = $self->{action}->{var};
+
+               if (not defined ($self->{conf}->{$var}))
+               {
+                    $self->setError ("$_: There is no variables named '$var'");
+                    return 0;
+               }
 
                print "$var = '", $self->{conf}->{$var}, "'\n";
           }
@@ -614,42 +642,30 @@ sub action
                my $m_expr = $self->{action}->{expr};
 
                $self->{conf}->{macros}->{$m_name} = $m_expr;
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("unset-macro")
           {
                my $m_name = $self->{action}->{name};
 
-               delete $self->{conf}->{macros}->{$m_name};
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
+               if (not defined ($self->{conf}->{macros}->{$m_name}))
                {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no macros named '$m_name'");
                     return 0;
                }
 
-               print "Configuration $cfgNb created!\n";
+               delete $self->{conf}->{macros}->{$m_name};
           }
 
           when ("get-macro")
           {
                my $m_name = $self->{action}->{name};
+
+               if (not defined ($self->{conf}->{macros}->{$m_name}))
+               {
+                    $self->setError ("$_: There is no macros named '$m_name'");
+                    return 0;
+               }
 
                print "$m_name = '", $self->{conf}->{macros}->{$m_name}, "'\n";
           }
@@ -673,23 +689,17 @@ sub action
                          catname => $catname
                     };
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-get-cat")
           {
                my $catid = $self->{action}->{id};
+
+               if (not defined ($self->{conf}->{applicationList}->{$catid}))
+               {
+                    $self->setError ("$_: There is no category '$catid'");
+                    return 0;
+               }
 
                print "$catid: ", $self->{conf}->{applicationList}->{$catid}->{name}, "\n";
           }
@@ -723,18 +733,6 @@ sub action
                          uri         => "http://test1.example.com"
                     }
                };
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-set-uri")
@@ -760,18 +758,6 @@ sub action
                     $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
                     return 0;
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-set-name")
@@ -797,18 +783,6 @@ sub action
                     $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
                     return 0;
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-set-desc")
@@ -834,18 +808,6 @@ sub action
                     $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
                     return 0;
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-set-logo")
@@ -871,18 +833,6 @@ sub action
                     $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
                     return 0;
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-set-display")
@@ -908,18 +858,6 @@ sub action
                     $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
                     return 0;
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("apps-get")
@@ -946,7 +884,7 @@ sub action
 
                if ($found == 0)
                {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Application '$appid' not found");
+                    $self->setError ("$_: Application '$appid' not found");
                     return 0;
                }
           }
@@ -967,18 +905,6 @@ sub action
                          }
                     }
                }
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           ## Rules
@@ -995,18 +921,6 @@ sub action
                }
 
                $self->{conf}->{locationRules}->{$uri}->{$expr} = $rule;
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("rules-unset")
@@ -1027,18 +941,6 @@ sub action
                }
 
                delete $self->{conf}->{locationRules}->{$uri}->{$expr};
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("rules-get")
@@ -1047,7 +949,7 @@ sub action
 
                if (not defined ($self->{conf}->{locationRules}->{$uri}))
                {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$uri'");
+                    $self->setError ("$_: There is no virtual host '$uri'");
                     return 0;
                }
 
@@ -1066,18 +968,6 @@ sub action
                my $val = $self->{action}->{val};
 
                $self->{conf}->{exportedVars}->{$key} = $val;
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("unexport-var")
@@ -1091,18 +981,6 @@ sub action
                }
 
                delete $self->{conf}->{exportedVars}->{$key};
-
-               # Save configuration
-               my $cfgNb = $self->saveConf ();
-
-               # If there is no config identifier, then an error occured
-               if (!$cfgNb)
-               {
-                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
-                    return 0;
-               }
-
-               print "Configuration $cfgNb created!\n";
           }
 
           when ("get-exported-vars")
