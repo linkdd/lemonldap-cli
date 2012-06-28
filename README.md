@@ -47,9 +47,9 @@ lemonldap-cli apps-rm <app id>
 Manage rules:
 
 ```
-lemonldap-cli rules-set <uri> <expr> <rule>
-lemonldap-cli rules-unset <uri> <expr>
-lemonldap-cli rules-get <uri>
+lemonldap-cli rules-set <virtual host> <expr> <rule>
+lemonldap-cli rules-unset <virtual host> <expr>
+lemonldap-cli rules-get <virtual host>
 ```
 
 Manage exported variables:
@@ -58,5 +58,21 @@ Manage exported variables:
 lemonldap-cli export-var <key> <value>
 lemonldap-cli unexport-var <key>
 lemonldap-cli get-exported-vars
+```
+
+Manage exported headers:
+
+```
+lemonldap-cli export-header <virtual host> <HTTP header> <perl expression>
+lemonldap-cli unexport-header <virtual host> <HTTP header>
+lemonldap-cli get-exported-headers <virtual host>
+```
+
+Manage virtual hosts:
+
+```
+lemonldap-cli vhost-add <virtual host uri>
+lemonldap-cli vhost-del <virtual host>
+lemonldap-cli vhost-list
 ```
 

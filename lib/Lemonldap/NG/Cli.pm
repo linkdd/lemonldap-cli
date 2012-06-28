@@ -577,6 +577,74 @@ sub parseCmd
                };
           }
 
+          ## exported headers
+
+          when ("export-header")
+          {
+               # export-header takes 3 parameters
+               if ($self->{argc} < 4)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost  = @{$self->{argv}}[1];
+               my $header = @{$self->{argv}}[2];
+               my $expr   = @{$self->{argv}}[3];
+
+               # define action
+               $self->{action} =
+               {
+                    type   => "export-header",
+                    save   => 1,
+                    vhost  => $vhost,
+                    header => $header,
+                    expr   => $expr
+               };
+          }
+
+          when ("unexport-header")
+          {
+               # unexport-header takes two parameter
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost  = @{$self->{argv}}[1];
+               my $header = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type   => "unexport-header",
+                    save   => 1,
+                    vhost  => $vhost,
+                    header => $header,
+               };
+          }
+
+          when ("get-exported-headers")
+          {
+               # get-exported-header takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "get-exported-headers",
+                    save  => 0,
+                    vhost => $vhost
+               };
+          }
+
           # no action found
           default
           {
@@ -988,6 +1056,60 @@ sub action
                while (my ($key, $val) = each %{$self->{conf}->{exportedVars}})
                {
                     print "$key = $val\n";
+               }
+          }
+
+          ## exported headers
+
+          when ("export-header")
+          {
+               my $vhost  = $self->{action}->{vhost};
+               my $header = $self->{action}->{header};
+               my $expr   = $self->{action}->{expr};
+
+               if (not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$vhost'\n");
+                    return 0;
+               }
+
+               $self->{conf}->{exportedHeaders}->{$vhost}->{$header} = $expr;
+          }
+
+          when ("unexport-header")
+          {
+               my $vhost  = $self->{action}->{vhost};
+               my $header = $self->{action}->{header};
+               my $expr   = $self->{action}->{expr};
+
+               if (not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$vhost'\n");
+                    return 0;
+               }
+
+               if (not defined ($self->{conf}->{exportedHeaders}->{$vhost}->{$header}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no header named '$header' exported for virtual host '$vhost'\n");
+                    return 0;
+               }
+
+               delete $self->{conf}->{exportedHeaders}->{$vhost}->{$header};
+          }
+
+          when ("get-exported-headers")
+          {
+               my $vhost = $self->{action}->{vhost};
+
+               if (not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+               {
+                    $self->setError ("$_: There is no virtual host '$vhost'\n");
+                    return 0;
+               }
+
+               while (my ($header, $expr) = each %{$self->{conf}->{exportedHeaders}->{$vhost}})
+               {
+                    print "$header: '$expr'\n";
                }
           }
 
