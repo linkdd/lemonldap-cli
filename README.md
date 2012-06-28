@@ -52,3 +52,11 @@ lemonldap-cli rules-unset <uri> <expr>
 lemonldap-cli rules-get <uri>
 ```
 
+Manage exported variables:
+
+```
+lemonldap-cli export-var <key> <value>
+lemonldap-cli unexport-var <key>
+lemonldap-cli get-exported-vars
+```
+

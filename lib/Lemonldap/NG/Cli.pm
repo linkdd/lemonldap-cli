@@ -487,6 +487,56 @@ sub parseCmd
                };
           }
 
+          ## exported variables
+
+          when ("export-var")
+          {
+               # export-var takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $key = @{$self->{argv}}[1];
+               my $val = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "export-var",
+                    key  => $key,
+                    val  => $val
+               };
+          }
+
+          when ("unexport-var")
+          {
+               # unexport-var takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $key = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "unexport-var",
+                    key  => $key
+               };
+          }
+
+          when ("get-exported-vars")
+          {
+               # get-exported-varis doesn't take any parameter
+
+               # define action
+               $self->{action} = { type => "get-exported-vars" };
+          }
+
           # no action found
           default
           {
@@ -1005,6 +1055,61 @@ sub action
                while (my ($expr, $rule) = each %{$self->{conf}->{locationRules}->{$uri}})
                {
                     print "- $expr => '$rule'\n";
+               }
+          }
+
+          ## exported variables
+
+          when ("export-var")
+          {
+               my $key = $self->{action}->{key};
+               my $val = $self->{action}->{val};
+
+               $self->{conf}->{exportedVars}->{$key} = $val;
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("unexport-var")
+          {
+               my $key = $self->{action}->{key};
+
+               if (not defined ($self->{conf}->{exportedVars}->{$key}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no exported variables named '$key'");
+                    return 0;
+               }
+
+               delete $self->{conf}->{exportedVars}->{$key};
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          when ("get-exported-vars")
+          {
+               while (my ($key, $val) = each %{$self->{conf}->{exportedVars}})
+               {
+                    print "$key = $val\n";
                }
           }
 
