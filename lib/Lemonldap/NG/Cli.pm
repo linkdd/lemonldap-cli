@@ -11,7 +11,7 @@ use feature qw (switch);
 
 our $VERSION = "0.1";
 
-our $ERRORS =
+my $ERRORS =
 {
      TOO_FEW_ARGUMENTS  => "Too few arguments",
      UNKNOWN_ACTION     => "Unknown action",
