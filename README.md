@@ -44,3 +44,11 @@ lemonldap-cli apps-get <app id>
 lemonldap-cli apps-rm <app id>
 ```
 
+Manage rules:
+
+```
+lemonldap-cli rules-set <uri> <expr> <rule>
+lemonldap-cli rules-unset <uri> <expr>
+lemonldap-cli rules-get <uri>
+```
+

@@ -422,6 +422,71 @@ sub parseCmd
                };
           }
 
+          ## Rules
+
+          when ("rules-set")
+          {
+               # rules-set takes 3 parameters
+               if ($self->{argc} < 4)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $uri  = @{$self->{argv}}[1];
+               my $expr = @{$self->{argv}}[2];
+               my $rule = @{$self->{argv}}[3];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "rules-set",
+                    uri  => $uri,
+                    expr => $expr,
+                    rule => $rule
+               };
+          }
+
+          when ("rules-unset")
+          {
+               # rules-unset takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $uri  = @{$self->{argv}}[1];
+               my $expr = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "rules-unset",
+                    uri  => $uri,
+                    expr => $expr
+               };
+          }
+
+          when ("rules-get")
+          {
+               # rules-get takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $uri = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "rules-get",
+                    uri  => $uri
+               };
+          }
+
           # no action found
           default
           {
@@ -866,6 +931,35 @@ sub action
                print "Configuration $cfgNb created!\n";
           }
 
+          ## Rules
+
+          when ("rules-set")
+          {
+               my $uri  = $self->{action}->{uri};
+               my $expr = $self->{action}->{expr};
+               my $rule = $self->{action}->{rule};
+
+               if (not defined ($self->{conf}->{locationRules}->{$uri}))
+               {
+                    $self->{conf}->{locationRules}->{$uri} = {};
+               }
+
+               $self->{conf}->{locationRules}->{$uri}->{$expr} = $rule;
+
+               # Save configuration
+               my $cfgNb = $self->saveConf ();
+
+               # If there is no config identifier, then an error occured
+               if (!$cfgNb)
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR});
+                    return 0;
+               }
+
+               print "Configuration $cfgNb created!\n";
+          }
+
+          # no implementation found
           default
           {
                $self->setError ("$_: ".$ERRORS->{NOT_IMPLEMENTED});
