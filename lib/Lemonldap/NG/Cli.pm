@@ -1157,6 +1157,14 @@ __END__
 
 Lemonldap::NG::Cli - Command Line Interface to edit LemonLDAP::NG configuration.
 
+=head1 SYNOPSIS
+
+  use Lemonldap::NG::Cli;
+  
+  my $app = Lemonldap::NG::Cli->new ();
+  my $ret = $app->run (\@ARGV);
+  exit ($ret);
+
 =head1 DESCRIPTION
 
 Lemonldap::NG::Cli allow user to edit the configuration of Lemonldap::NG via the
