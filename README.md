@@ -73,6 +73,9 @@ Manage virtual hosts:
 ```
 lemonldap-ng-cli vhost-add <virtual host uri>
 lemonldap-ng-cli vhost-del <virtual host>
+lemonldap-ng-cli vhost-set-port <virtual host> <port>
+lemonldap-ng-cli vhost-set-https <virtual host> <value>
+lemonldap-ng-cli vhost-set-maintenance  <virtual host> <value>
 lemonldap-ng-cli vhost-list
 ```
 

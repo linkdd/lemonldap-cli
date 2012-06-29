@@ -645,6 +645,72 @@ sub parseCmd
                };
           }
 
+          ## virtual host
+
+          when ("vhost-add")
+          {
+               # vhost-add takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "vhost-add",
+                    save  => 1,
+                    vhost => $vhost
+               };
+          }
+
+          when ("vhost-del")
+          {
+               # vhost-del takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = @{$self->{argv}}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "vhost-del",
+                    save  => 1,
+                    vhost => $vhost
+               };
+          }
+
+          when ("vhost-set-port")
+          {
+          }
+
+          when ("vhost-set-https")
+          {
+          }
+
+          when ("vhost-set-maintenance")
+          {
+          }
+
+          when ("vhost-list")
+          {
+               # vhost-list doesn't take any parameter
+
+               # define action
+               $self->{action} =
+               {
+                    type => "vhost-list",
+                    save => 0
+               };
+          }
+
           # no action found
           default
           {
@@ -1110,6 +1176,93 @@ sub action
                while (my ($header, $expr) = each %{$self->{conf}->{exportedHeaders}->{$vhost}})
                {
                     print "$header: '$expr'\n";
+               }
+          }
+
+          ## virtual hosts
+
+          when ("vhost-add")
+          {
+               my $vhost = $self->{action}->{vhost};
+
+               if (defined ($self->{conf}->{vhostOptions}->{$vhost}) or defined ($self->{conf}->{locationRules}->{$vhost}) or defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+               {
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": Virtual host '$vhost' already exist");
+                    return 0;
+               }
+
+               $self->{conf}->{vhostOptions}->{$vhost} =
+               {
+                    vhostMaintenance => '0',
+                    vhostPort => '-1',
+                    vhostHttps => '-1'
+               };
+               $self->{conf}->{locationRules}->{$vhost} =
+               {
+                    default => "deny"
+               };
+               $self->{conf}->{exportedHeaders}->{$vhost} =
+               {
+                    "Auth-User" => "\$uid"
+               };
+          }
+
+          when ("vhost-del")
+          {
+               my $vhost = $self->{action}->{vhost};
+               my $error = "No virtual host in: ", $nerror = 0;
+
+               if (not defined ($self->{conf}->{vhostOptions}->{$vhost}))
+               {
+                    $nerror++;
+                    $error .= "vhostOptions ";
+               }
+               else
+               {
+                    delete $self->{conf}->{vhostOptions}->{$vhost};
+               }
+
+               if (not defined ($self->{conf}->{locationRules}->{$vhost}))
+               {
+                    $nerror++;
+                    $error .= "locationRules ";
+               }
+               else
+               {
+                    delete $self->{conf}->{locationRules}->{$vhost};
+               }
+
+               if (not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+               {
+                    $nerror++;
+                    $error .= "exportedHeaders";
+               }
+               else
+               {
+                    delete $self->{conf}->{exportedHeaders}->{$vhost};
+               }
+
+               if ($nerror == 3)
+               {
+                    $error .= ". abortting...";
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": $error");
+                    return 0;
+               }
+               elsif ($nerror != 0)
+               {
+                    $error .= ". ignoring...";
+                    $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": $error");
+               }
+          }
+
+          when ("vhost-list")
+          {
+               while (my ($vhost, $vhostoptions) = each %{$self->{conf}->{vhostOptions}})
+               {
+                    print "- $vhost => ";
+                    print "Maintenance: $vhostoptions->{vhostMaintenance} | ";
+                    print "Port: $vhostoptions->{vhostPort} | ";
+                    print "HTTPS: $vhostoptions->{vhostHttps}\n";
                }
           }
 
