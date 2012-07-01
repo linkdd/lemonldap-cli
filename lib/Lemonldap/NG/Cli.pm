@@ -689,14 +689,69 @@ sub parseCmd
 
           when ("vhost-set-port")
           {
+               # vhost-set-port takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = @{$self->{argv}}[1];
+               my $port  = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "vhost-set-port",
+                    save  => 1,
+                    vhost => $vhost,
+                    port  => $port
+               };
           }
 
           when ("vhost-set-https")
           {
+               # vhost-set-https takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = @{$self->{argv}}[1];
+               my $https = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "vhost-set-https",
+                    save  => 1,
+                    vhost => $vhost,
+                    https => $https
+               };
           }
+
 
           when ("vhost-set-maintenance")
           {
+               # vhost-set-maintenance takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = @{$self->{argv}}[1];
+               my $off   = @{$self->{argv}}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "vhost-set-maintenance",
+                    save  => 1,
+                    vhost => $vhost,
+                    off   => $off
+               };
           }
 
           when ("vhost-list")
@@ -1210,7 +1265,8 @@ sub action
           when ("vhost-del")
           {
                my $vhost = $self->{action}->{vhost};
-               my $error = "No virtual host in: ", $nerror = 0;
+               my $error = "No virtual host in: ";
+               my $nerror = 0;
 
                if (not defined ($self->{conf}->{vhostOptions}->{$vhost}))
                {
@@ -1252,6 +1308,90 @@ sub action
                {
                     $error .= ". ignoring...";
                     $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": $error");
+               }
+          }
+
+          when ("vhost-set-port")
+          {
+               my $vhost = $self->{action}->{vhost};
+               my $port  = $self->{action}->{port};
+
+               if (not defined ($self->{conf}->{vhostOptions}->{$vhost}))
+               {
+                    if (not defined ($self->{conf}->{locationRules}->{$vhost}) and not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+                    {
+                         $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$vhost'");
+                         return 0;
+                    }
+                    else
+                    {
+                         $self->{conf}->{vhostOptions}->{$vhost} =
+                         {
+                              vhostPort => $port,
+                              vhostHttps => '-1',
+                              vhostMaintenance => '0'
+                         };
+                    }
+               }
+               else
+               {
+                    $self->{conf}->{vhostOptions}->{$vhost}->{vhostPort} = $port;
+               }
+          }
+
+          when ("vhost-set-https")
+          {
+               my $vhost = $self->{action}->{vhost};
+               my $https = $self->{action}->{https};
+
+               if (not defined ($self->{conf}->{vhostOptions}->{$vhost}))
+               {
+                    if (not defined ($self->{conf}->{locationRules}->{$vhost}) and not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+                    {
+                         $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$vhost'");
+                         return 0;
+                    }
+                    else
+                    {
+                         $self->{conf}->{vhostOptions}->{$vhost} =
+                         {
+                              vhostPort => '-1',
+                              vhostHttps => $https,
+                              vhostMaintenance => '0'
+                         };
+                    }
+               }
+               else
+               {
+                    $self->{conf}->{vhostOptions}->{$vhost}->{vhostHttps} = $https;
+               }
+          }
+
+          when ("vhost-set-maintenance")
+          {
+               my $vhost = $self->{action}->{vhost};
+               my $off   = $self->{action}->{off};
+
+               if (not defined ($self->{conf}->{vhostOptions}->{$vhost}))
+               {
+                    if (not defined ($self->{conf}->{locationRules}->{$vhost}) and not defined ($self->{conf}->{exportedHeaders}->{$vhost}))
+                    {
+                         $self->setError ("$_: ".$ERRORS->{CONFIG_WRITE_ERROR}.": There is no virtual host '$vhost'");
+                         return 0;
+                    }
+                    else
+                    {
+                         $self->{conf}->{vhostOptions}->{$vhost} =
+                         {
+                              vhostPort => '-1',
+                              vhostHttps => '-1',
+                              vhostMaintenance => $off
+                         };
+                    }
+               }
+               else
+               {
+                    $self->{conf}->{vhostOptions}->{$vhost}->{vhostMaintenance} = $off;
                }
           }
 
