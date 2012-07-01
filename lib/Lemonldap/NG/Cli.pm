@@ -56,10 +56,10 @@ sub saveConf
 # @return Exit code
 sub run
 {
-     my ($self, $argv) = @_;
+     my ($self, @argv) = @_;
 
-     $self->{argv} = \@{$argv};
-     $self->{argc} = @{$argv};
+     $self->{argv} = \@argv;
+     $self->{argc} = @argv;
 
      if (!$self->parseCmd ())
      {
@@ -106,7 +106,7 @@ sub parseCmd
           return 0;
      }
 
-     given (@{$self->{argv}}[0])
+     given ($self->{argv}[0])
      {
           ## Variables
 
@@ -119,8 +119,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $var = @{$self->{argv}}[1];
-               my $val = @{$self->{argv}}[2];
+               my $var = $self->{argv}[1];
+               my $val = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -141,7 +141,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $var = @{$self->{argv}}[1];
+               my $var = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -161,7 +161,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $var = @{$self->{argv}}[1];
+               my $var = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -183,8 +183,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $m_name = @{$self->{argv}}[1];
-               my $m_expr = @{$self->{argv}}[2];
+               my $m_name = $self->{argv}[1];
+               my $m_expr = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -205,7 +205,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $m_name = @{$self->{argv}}[1];
+               my $m_name = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -226,7 +226,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $m_name = @{$self->{argv}}[1];
+               my $m_name = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -248,8 +248,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $catid   = @{$self->{argv}}[1];
-               my $catname = @{$self->{argv}}[2];
+               my $catid   = $self->{argv}[1];
+               my $catname = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -264,13 +264,13 @@ sub parseCmd
           when ("apps-get-cat")
           {
                # apps-get-cat takes one parameter
-               if ($self->{argc} < 3)
+               if ($self->{argc} < 2)
                {
                     $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
                     return 0;
                }
 
-               my $catid = @{$self->{argv}}[1];
+               my $catid = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -290,8 +290,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid = @{$self->{argv}}[1];
-               my $catid = @{$self->{argv}}[2];
+               my $appid = $self->{argv}[1];
+               my $catid = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -312,8 +312,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid  = @{$self->{argv}}[1];
-               my $appuri = @{$self->{argv}}[2];
+               my $appid  = $self->{argv}[1];
+               my $appuri = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -334,8 +334,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid   = @{$self->{argv}}[1];
-               my $appname = @{$self->{argv}}[2];
+               my $appid   = $self->{argv}[1];
+               my $appname = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -356,8 +356,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid   = @{$self->{argv}}[1];
-               my $appdesc = @{$self->{argv}}[2];
+               my $appid   = $self->{argv}[1];
+               my $appdesc = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -378,8 +378,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid   = @{$self->{argv}}[1];
-               my $applogo = @{$self->{argv}}[2];
+               my $appid   = $self->{argv}[1];
+               my $applogo = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -400,8 +400,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid  = @{$self->{argv}}[1];
-               my $appdpy = @{$self->{argv}}[2];
+               my $appid  = $self->{argv}[1];
+               my $appdpy = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -422,7 +422,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid = @{$self->{argv}}[1];
+               my $appid = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -442,7 +442,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $appid = @{$self->{argv}}[1];
+               my $appid = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -464,9 +464,9 @@ sub parseCmd
                     return 0;
                }
 
-               my $uri  = @{$self->{argv}}[1];
-               my $expr = @{$self->{argv}}[2];
-               my $rule = @{$self->{argv}}[3];
+               my $uri  = $self->{argv}[1];
+               my $expr = $self->{argv}[2];
+               my $rule = $self->{argv}[3];
 
                # define action
                $self->{action} =
@@ -488,8 +488,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $uri  = @{$self->{argv}}[1];
-               my $expr = @{$self->{argv}}[2];
+               my $uri  = $self->{argv}[1];
+               my $expr = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -510,7 +510,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $uri = @{$self->{argv}}[1];
+               my $uri = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -532,8 +532,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $key = @{$self->{argv}}[1];
-               my $val = @{$self->{argv}}[2];
+               my $key = $self->{argv}[1];
+               my $val = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -554,7 +554,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $key = @{$self->{argv}}[1];
+               my $key = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -588,9 +588,9 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost  = @{$self->{argv}}[1];
-               my $header = @{$self->{argv}}[2];
-               my $expr   = @{$self->{argv}}[3];
+               my $vhost  = $self->{argv}[1];
+               my $header = $self->{argv}[2];
+               my $expr   = $self->{argv}[3];
 
                # define action
                $self->{action} =
@@ -612,8 +612,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost  = @{$self->{argv}}[1];
-               my $header = @{$self->{argv}}[2];
+               my $vhost  = $self->{argv}[1];
+               my $header = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -634,7 +634,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost = @{$self->{argv}}[1];
+               my $vhost = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -656,7 +656,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost = @{$self->{argv}}[1];
+               my $vhost = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -676,7 +676,7 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost = @{$self->{argv}}[1];
+               my $vhost = $self->{argv}[1];
 
                # define action
                $self->{action} =
@@ -696,8 +696,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost = @{$self->{argv}}[1];
-               my $port  = @{$self->{argv}}[2];
+               my $vhost = $self->{argv}[1];
+               my $port  = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -718,8 +718,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost = @{$self->{argv}}[1];
-               my $https = @{$self->{argv}}[2];
+               my $vhost = $self->{argv}[1];
+               my $https = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -741,8 +741,8 @@ sub parseCmd
                     return 0;
                }
 
-               my $vhost = @{$self->{argv}}[1];
-               my $off   = @{$self->{argv}}[2];
+               my $vhost = $self->{argv}[1];
+               my $off   = $self->{argv}[2];
 
                # define action
                $self->{action} =
@@ -890,7 +890,7 @@ sub action
                     return 0;
                }
 
-               print "$catid: ", $self->{conf}->{applicationList}->{$catid}->{name}, "\n";
+               print "$catid: ", $self->{conf}->{applicationList}->{$catid}->{catname}, "\n";
           }
 
           when ("apps-add")

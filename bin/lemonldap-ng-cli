@@ -5,7 +5,7 @@ use strict;
 
 my $app = Lemonldap::NG::Cli->new ();
 
-my $ret = $app->run (\@ARGV);
+my $ret = $app->run (@ARGV);
 
 exit ($ret);
 
