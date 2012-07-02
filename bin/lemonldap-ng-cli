@@ -73,6 +73,12 @@ Manage virtual hosts:
   lemonldap-ng-cli vhost-set-maintenance  <virtual host> <value>
   lemonldap-ng-cli vhost-list
 
+Global Storage:
+
+  lemonldap-ng-cli global-storage
+  lemonldap-ng-cli global-storage-set-dir <path>
+  lemonldap-ng-cli global-storage-set-lockdir <path>
+
 =head1 DESCRIPTION
 
 lemonldap-ng-cli allow user to edit the configuration of Lemonldap::NG via the

@@ -766,6 +766,60 @@ sub parseCmd
                };
           }
 
+          ## global storage
+
+          when ("global-storage")
+          {
+               # global-storage doesn't take any parameter
+
+               # define action
+               $self->{action} =
+               {
+                    type => "global-storage",
+                    save => 0
+               };
+          }
+
+          when ("global-storage-set-dir")
+          {
+               # global-storage takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $path = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "global-storage-set-dir",
+                    save => 1,
+                    path => $path
+               };
+          }
+
+          when ("global-storage-set-lockdir")
+          {
+               # global-storage takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $path = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type => "global-storage-set-lockdir",
+                    save => 1,
+                    path => $path
+               };
+          }
+
           # no action found
           default
           {
@@ -1404,6 +1458,29 @@ sub action
                     print "Port: $vhostoptions->{vhostPort} | ";
                     print "HTTPS: $vhostoptions->{vhostHttps}\n";
                }
+          }
+
+          ## global storage
+
+          when ("global-storage")
+          {
+               print "Global Storage options :\n";
+               print "- Directory: $self->{conf}->{globalStorageOptions}->{Directory}\n";
+               print "- Lock Directory: $self->{conf}->{globalStorageOptions}->{LockDirectory}\n";
+          }
+
+          when ("global-storage-set-dir")
+          {
+               my $path = $self->{action}->{path};
+
+               $self->{conf}->{globalStorageOptions}->{Directory} = $path;
+          }
+
+          when ("global-storage-set-lockdir")
+          {
+               my $path = $self->{action}->{path};
+
+               $self->{conf}->{globalStorageOptions}->{LockDirectory} = $path;
           }
 
           # no implementation found

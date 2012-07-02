@@ -79,3 +79,11 @@ lemonldap-ng-cli vhost-set-maintenance  <virtual host> <value>
 lemonldap-ng-cli vhost-list
 ```
 
+Global Storage :
+
+```
+lemonldap-ng-cli global-storage
+lemonldap-ng-cli global-storage-set-dir <path>
+lemonldap-ng-cli global-storage-set-lockdir <path>
+```
+
