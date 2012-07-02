@@ -820,6 +820,62 @@ sub parseCmd
                };
           }
 
+          ## reload URLs
+
+          when ("reload-urls")
+          {
+               # reload-urls doesn't take any parameter
+
+               # define action
+               $self->{action} =
+               {
+                    type => "reload-urls",
+                    save => 0
+               };
+          }
+
+          when ("reload-url-add")
+          {
+               # reload-url-add takes two parameters
+               if ($self->{argc} < 3)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = $self->{argv}[1];
+               my $url   = $self->{argv}[2];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "reload-url-add",
+                    save  => 0,
+                    vhost => $vhost,
+                    url   => $url
+               };
+          }
+
+          when ("reload-url-del")
+          {
+               # reload-url-del takes one parameter
+               if ($self->{argc} < 2)
+               {
+                    $self->setError ("$_: ".$ERRORS->{TOO_FEW_ARGUMENTS});
+                    return 0;
+               }
+
+               my $vhost = $self->{argv}[1];
+
+               # define action
+               $self->{action} =
+               {
+                    type  => "reload-url-del",
+                    save  => 0,
+                    vhost => $vhost
+               };
+          }
+
           # no action found
           default
           {
