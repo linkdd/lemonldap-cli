@@ -1,7 +1,22 @@
 #!/usr/bin/perl -w
 
 use Lemonldap::NG::Cli;
+use POSIX;
 use strict;
+
+# become www-data:www-data and give up root privileges
+POSIX::setgid ((getgrnam ("www-data"))[2]);
+POSIX::setuid ((getpwnam ("www-data"))[2]);
+
+# if we are still root
+if ($> == 0)
+{
+     # ask the user to continue or abort
+     print STDERR "$0 must not be launchezd as root since local cache can be corrupted.\n";
+     print STDERR "Continue (y/N)? ";
+     my $res = <STDIN>;
+     exit 1 unless ($res =~ /^y/i);
+}
 
 my $app = Lemonldap::NG::Cli->new ();
 
