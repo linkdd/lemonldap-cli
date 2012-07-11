@@ -18,6 +18,6 @@ my $build = Module::Build->new (
           },
 );
 
-$build->install_path (conf => $build->install_path () + '/etc/lemonldap-ng/');
+$build->install_path (conf => $build->prefix () . '/etc/lemonldap-ng/');
 $build->add_build_element ("conf");
 $build->create_build_script ();
