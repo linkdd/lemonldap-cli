@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-#use Lemonldap::NG::Cli;
+use Lemonldap::NG::Cli;
 use Config::IniFiles;
 use POSIX;
 use strict;
@@ -57,11 +57,11 @@ sub loadConfig
 
 exit (0);
 
-#my $app = Lemonldap::NG::Cli->new ();
+my $app = Lemonldap::NG::Cli->new ();
 
-#my $ret = $app->run (@ARGV);
+my $ret = $app->run (@ARGV);
 
-#exit ($ret);
+exit ($ret);
 
 __END__
 
