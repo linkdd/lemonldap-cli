@@ -3,7 +3,7 @@
    "author" : [
       "David Delassus <david.jose.delassus@gmail.com>"
    ],
-   "dynamic_config" : 0,
+   "dynamic_config" : 1,
    "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112150",
    "license" : [
       "perl_5"
@@ -14,6 +14,12 @@
    },
    "name" : "Lemonldap-NG-Cli",
    "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "Config::IniFiles" : 0,
+            "Module::Build" : "0.38"
+         }
+      },
       "runtime" : {
          "requires" : {
             "Config::IniFiles" : 0,
@@ -24,7 +30,7 @@
    "provides" : {
       "Lemonldap::NG::Cli" : {
          "file" : "lib/Lemonldap/NG/Cli.pm",
-         "version" : "0.1"
+         "version" : "0.2"
       }
    },
    "release_status" : "stable",
@@ -33,5 +39,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.1"
+   "version" : "0.2"
 }

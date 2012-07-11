@@ -9,7 +9,7 @@ use feature qw (switch);
 
 # Constants
 
-our $VERSION = "0.1";
+our $VERSION = "0.2";
 
 my $ERRORS =
 {
