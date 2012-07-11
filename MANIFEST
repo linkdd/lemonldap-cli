@@ -1,12 +1,12 @@
 bin/lemonldap-ng-cli
-Changes
 lib/Lemonldap/NG/Cli.pm
+t/Lemonldap-NG-Cli.t
 lemonldap-cli.ini
-LICENSE
 Build.PL
+Changes
+LICENSE
+README.md
+TODO
 MANIFEST			This list of files
 META.yml
-README.md
-t/Lemonldap-NG-Cli.t
-TODO
 META.json
