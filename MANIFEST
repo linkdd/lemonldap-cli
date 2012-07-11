@@ -1,4 +1,5 @@
-bin/lemonldap-ng-cli
+lemonldap-ng-cli.PL
+lemonldap-ng-cli.in
 lib/Lemonldap/NG/Cli.pm
 t/Lemonldap-NG-Cli.t
 lemonldap-cli.ini

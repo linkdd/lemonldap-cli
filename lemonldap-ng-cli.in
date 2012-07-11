@@ -53,7 +53,7 @@ sub loadConfig
      }
 }
 
-&loadConfig ("lemonldap-cli.ini");
+&loadConfig ("__CONFPATH__/lemonldap-cli.ini");
 
 exit (0);
 
