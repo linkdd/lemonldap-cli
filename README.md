@@ -79,7 +79,7 @@ lemonldap-ng-cli vhost-set-maintenance  <virtual host> <value>
 lemonldap-ng-cli vhost-list
 ```
 
-Global Storage :
+Global Storage:
 
 ```
 lemonldap-ng-cli global-storage
@@ -87,3 +87,10 @@ lemonldap-ng-cli global-storage-set-dir <path>
 lemonldap-ng-cli global-storage-set-lockdir <path>
 ```
 
+Reload URLs:
+
+```
+lemonldap-ng-cli reload-urls
+lemonldap-ng-cli reload-url-add <vhost> <url>
+lemonldap-ng-cli reload-url-del <vhost>
+```

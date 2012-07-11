@@ -133,6 +133,12 @@ Global Storage:
   lemonldap-ng-cli global-storage-set-dir <path>
   lemonldap-ng-cli global-storage-set-lockdir <path>
 
+Reload URLs:
+
+  lemonldap-ng-cli reload-urls
+  lemonldap-ng-cli reload-url-add <vhost> <url>
+  lemonldap-ng-cli reload-url-del <vhost>
+
 =head1 DESCRIPTION
 
 lemonldap-ng-cli allow user to edit the configuration of Lemonldap::NG via the
