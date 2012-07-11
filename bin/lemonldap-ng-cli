@@ -1,28 +1,67 @@
 #!/usr/bin/perl -w
 
-use Lemonldap::NG::Cli;
+#use Lemonldap::NG::Cli;
+use Config::IniFiles;
 use POSIX;
 use strict;
 
-# become www-data:www-data and give up root privileges
-POSIX::setgid ((getgrnam ("www-data"))[2]);
-POSIX::setuid ((getpwnam ("www-data"))[2]);
-
-# if we are still root
-if ($> == 0)
+sub giveUpPrivileges
 {
-     # ask the user to continue or abort
-     print STDERR "$0 must not be launchezd as root since local cache can be corrupted.\n";
-     print STDERR "Continue (y/N)? ";
-     my $res = <STDIN>;
-     exit 1 unless ($res =~ /^y/i);
+     my ($user, $group) = @_;
+
+     if (not defined ($user))
+     {
+          $user = "nobody";
+     }
+
+     if (not defined ($group))
+     {
+          $group = "nobody";
+     }
+
+     # become $user:$group and give up root privileges
+     POSIX::setgid ((getgrnam ($group))[2]);
+     POSIX::setuid ((getpwnam ($user))[2]);
+
+     # if we are still root
+     if ($> == 0)
+     {
+          # ask the user to continue or abort
+          print STDERR "$0 must not be launchezd as root since local cache can be corrupted.\n";
+          print STDERR "Continue (y/N)? ";
+          my $res = <STDIN>;
+          exit 1 unless ($res =~ /^y/i);
+     }
 }
 
-my $app = Lemonldap::NG::Cli->new ();
+sub loadConfig
+{
+     my ($conffile) = @_;
 
-my $ret = $app->run (@ARGV);
+     my $cfg = Config::IniFiles->new ( -file => $conffile );
 
-exit ($ret);
+     if (defined ($cfg))
+     {
+          my $apacheuser  = $cfg->val ("apache", "user")  if $cfg->exists ("apache", "user")  or "nobody";
+          my $apachegroup = $cfg->val ("apache", "group") if $cfg->exists ("apache", "group") or "nobody";
+
+          &giveUpPrivileges ($apacheuser, $apachegroup);
+     }
+     else
+     {
+          &giveUpPrivileges ();
+     }
+}
+
+&loadConfig ("lemonldap-cli.ini");
+
+exit (0);
+
+#my $app = Lemonldap::NG::Cli->new ();
+
+#my $ret = $app->run (@ARGV);
+
+#exit ($ret);
 
 __END__
 
