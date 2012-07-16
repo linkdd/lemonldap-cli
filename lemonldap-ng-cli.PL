@@ -1,18 +1,25 @@
 #!/usr/bin/env perl
 
+use File::Basename;
 use Config::IniFiles;
 use strict;
 use warnings;
 
 my $outfile = shift;
 
-my $cfg = Config::IniFiles->new ( -file => "config" );
+my $cfg = Config::IniFiles->new ( -file => 'config' ) or die "Can't open build configuration";
 
-open (INBIN, "<lemonldap-ng-cli.in");
+open (INBIN, "<", "lemonldap-ng-cli.in") or die "Can't open file 'lemonldap-ng-cli.in' for reading";
 my @contents = <INBIN>;
 close (INBIN);
 
-open (OUTBIN, ">$outfile");
+my $dir = dirname ($outfile);
+if (not -d $dir)
+{
+     mkdir ($dir);
+}
+
+open (OUTBIN, ">", "$outfile") or die "Can't open file '$outfile' for writting";
 
 foreach (@contents)
 {
@@ -27,3 +34,5 @@ foreach (@contents)
 
      print OUTBIN $line;
 }
+
+close (OUTBIN);
