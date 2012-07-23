@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+use 5.010;
 use Module::Build;
 use Config::IniFiles;
 use strict;
@@ -20,6 +21,7 @@ my $build = Module::Build->new (
           {
                'Config::IniFiles'            => 0,
                'Lemonldap::NG::Common::Conf' => '1.0',
+               'perl'                        => '5.010',
           },
 
           conf_files =>
