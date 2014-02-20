@@ -5,6 +5,10 @@ This project was started by [**9h37 SAS**](http://9h37.fr)
 *lemonldap-ng-cli* is a command line tool to configure **LemonLDAP::NG** from the
 command line. Make you able to deploy your web application faster and easier.
 
+*NB: This project is now maintained by the LemonLDAP::NG team and so, this repository is depecrated. You can find the script, after installation of LemonLDAP::NG,  at :*
+
+    /usr/share/lemonldap-ng/bin/lemonldap-ng-cli
+
 # Installation
 
 ***To be written***
